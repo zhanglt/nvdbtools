@@ -1,0 +1,15 @@
+# vi temporary files
+.*.swp
+.vscode
+*.code-workspace
+*.bak
+
+/dbgen
+/cvedb
+/cvedb.*
+/vul-source
+/keys
+/*.tb
+/*.txt
+nvdbtools
+/dbsrc
