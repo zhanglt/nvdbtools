@@ -11,8 +11,8 @@
 /keys
 /*.tb
 /*.txt
-nvdbtools
-/dbsrc
-/test/*
-test
+/dbsrc/*
 *.db
+*.tb
+nvdbtools
+

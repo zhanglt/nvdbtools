@@ -5,9 +5,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"time"
@@ -20,30 +18,6 @@ import (
 	// utils "github.com/zhanglt/nvdbtools/share"
 	"github.com/neuvector/neuvector/share/utils"
 )
-
-type cvdData struct {
-	An string `json:"AN"`
-	Av []struct {
-		O string `json:"O"`
-		V string `json:"V"`
-	} `json:"AV"`
-	D  string `json:"D"`
-	Fv []struct {
-		O string `json:"O"`
-		V string `json:"V"`
-	} `json:"FV"`
-	Issue   time.Time   `json:"Issue"`
-	L       string      `json:"L"`
-	LastMod time.Time   `json:"LastMod"`
-	Mn      string      `json:"MN"`
-	Sc      float64     `json:"SC"`
-	Sc3     float64     `json:"SC3"`
-	Se      string      `json:"SE"`
-	Uv      interface{} `json:"UV"`
-	Vn      string      `json:"VN"`
-	Vv2     string      `json:"VV2"`
-	Vv3     string      `json:"VV3"`
-}
 
 var DB *sql.DB
 var err error
@@ -133,7 +107,7 @@ type dbSpace struct {
 	rawSHA  [][sha256.Size]byte
 }
 
-func (db *memDB) CreateDb(version string, srcPath string) bool {
+func (db *memDB) RewriteDb(version string, srcPath string) bool {
 	// if len(db.vuls) == 0 {
 	// 		log.Errorf("CVE update FAIL")
 	// 		return false
@@ -316,38 +290,4 @@ func cveDescrition(str string) string {
 		newBuf.WriteString(scanner.Text())
 	}
 	return newBuf.String()
-}
-func ReadlineValid(fileName string) ([]byte, error) {
-	var body []byte
-	var i int = 0
-	fp, err := os.Open(fileName)
-	if err != nil {
-		log.Println("file open error:", err)
-
-	}
-	defer fp.Close()
-	br := bufio.NewReader(fp)
-	for {
-		json_message, _, c := br.ReadLine() //按行读取文件
-		if c == io.EOF {
-			break
-		}
-		//log.Println("json======:", string(json_message))
-
-		//if !validator.Valid(json_message) {
-		//	log.Println("格式验证错误==========:")
-		//}
-		body = json_message
-
-		var rtep *cvdData = new(cvdData)
-		err := json.Unmarshal(json_message, rtep)
-		if err != nil {
-			i = i + 1
-			log.Println("序列化失败======:", i, err)
-		}
-		//log.Println("cvd id =======:", rtep.Vn)
-	}
-
-	return body, nil
-
 }

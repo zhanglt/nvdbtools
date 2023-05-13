@@ -9,8 +9,8 @@ if [ $scanner -lt 2 ]; then
 
 fi
 
-if [ -f "/tmp/cvedb" ];then
-  rm  /tmp/cvedb
+if [ -f "/tmp/nvdbtools/cvedb" ];then
+  rm  /tmp/nvdbtools/cvedb
 fi
 ID=`docker ps -a  |grep cvedb |grep Created |awk '{print $1}'`
 if [  -n "$ID" ]; then
@@ -25,7 +25,7 @@ ID=`docker ps -a  |grep cvedb |awk '{print $1}'`
 if [ ! -n "$ID" ]; then
     echo "scanner container is not created"
 else
-    docker cp   ${ID}":/etc/neuvector/db/cvedb" /tmp/ 
+    docker cp   ${ID}":/etc/neuvector/db/cvedb" /tmp/nvdbtools/
 fi
 docker rm -f $ID
 #docker cp   ${ID}":/etc/neuvector/db/cvedb" /tmp/ 

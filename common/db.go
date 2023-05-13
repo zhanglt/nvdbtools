@@ -1,9 +1,12 @@
 package common
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -139,4 +142,79 @@ func UNzipDb(nvCvedbPath, nvUnzipPath string) error {
 	}
 
 	return nil
+}
+func GetDbVersion(nvCvedbPath string) (float64, string, error) {
+	f, err := os.Open(nvCvedbPath)
+	if err != nil {
+		return 0, "", fmt.Errorf("Read db file fail: %v", err)
+	}
+	defer f.Close()
+
+	bhead := make([]byte, 4)
+	nlen, err := f.Read(bhead)
+	if err != nil || nlen != 4 {
+		return 0, "", fmt.Errorf("Read db file error: %v", err)
+	}
+	var headLen int32
+	err = binary.Read(bytes.NewReader(bhead), binary.BigEndian, &headLen)
+	if err != nil {
+		return 0, "", fmt.Errorf("Read header len error: %v", err)
+	}
+
+	if headLen > maxVersionHeader {
+		return 0, "", fmt.Errorf("Version Header too big: %v", headLen)
+	}
+
+	bhead = make([]byte, headLen)
+	nlen, err = f.Read(bhead)
+	if err != nil || nlen != int(headLen) {
+		return 0, "", fmt.Errorf("Read db file version error:%v", err)
+	}
+
+	var keyVer KeyVersion
+
+	err = json.Unmarshal(bhead, &keyVer)
+	if err != nil {
+		return 0, "", fmt.Errorf("Unmarshal keys error:%v", err)
+	}
+	verFl, err := strconv.ParseFloat(keyVer.Version, 64)
+	if err != nil {
+		return 0, "", fmt.Errorf("Invalid version value:%v", err)
+	}
+
+	return verFl, keyVer.UpdateTime, nil
+}
+func ReadlineValid(fileName string) ([]byte, error) {
+	var body []byte
+	var i int = 0
+	fp, err := os.Open(fileName)
+	if err != nil {
+		log.Println("file open error:", err)
+
+	}
+	defer fp.Close()
+	br := bufio.NewReader(fp)
+	for {
+		json_message, _, c := br.ReadLine() //按行读取文件
+		if c == io.EOF {
+			break
+		}
+		//log.Println("json======:", string(json_message))
+
+		//if !validator.Valid(json_message) {
+		//	log.Println("格式验证错误==========:")
+		//}
+		body = json_message
+
+		var rtep *Apps = new(Apps)
+		err := json.Unmarshal(json_message, rtep)
+		if err != nil {
+			i = i + 1
+			log.Println("序列化失败======:", i, err)
+		}
+		//log.Println("cvd id =======:", rtep.Vn)
+	}
+
+	return body, nil
+
 }

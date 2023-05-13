@@ -158,3 +158,55 @@ var DebianReleasesMapping = map[string]string{
 	"testing":      "10",
 	"unstable":     "unstable",
 }
+
+type Centos struct {
+	N  string `json:"N"`
+	NS string `json:"NS"`
+	D  string `json:"D"`
+	L  string `json:"L"`
+	S  string `json:"S"`
+	C2 struct {
+		Vectors string  `json:"Vectors"`
+		Score   float64 `json:"Score"`
+	} `json:"C2"`
+	C3 struct {
+		Vectors string  `json:"Vectors"`
+		Score   float64 `json:"Score"`
+	} `json:"C3"`
+	FB string `json:"FB"`
+	FI []struct {
+		N  string `json:"N"`
+		NS string `json:"NS"`
+		V  string `json:"V"`
+		MV string `json:"MV"`
+		A  string `json:"A"`
+	} `json:"FI"`
+	CPE     []string  `json:"CPE"`
+	CVE     []string  `json:"CVE"`
+	RATE    string    `json:"RATE"`
+	Issue   time.Time `json:"Issue"`
+	LastMod time.Time `json:"LastMod"`
+}
+type Apps struct {
+	An string `json:"AN"`
+	Av []struct {
+		O string `json:"O"`
+		V string `json:"V"`
+	} `json:"AV"`
+	D  string `json:"D"`
+	Fv []struct {
+		O string `json:"O"`
+		V string `json:"V"`
+	} `json:"FV"`
+	Issue   time.Time   `json:"Issue"`
+	L       string      `json:"L"`
+	LastMod time.Time   `json:"LastMod"`
+	Mn      string      `json:"MN"`
+	Sc      float64     `json:"SC"`
+	Sc3     float64     `json:"SC3"`
+	Se      string      `json:"SE"`
+	Uv      interface{} `json:"UV"`
+	Vn      string      `json:"VN"`
+	Vv2     string      `json:"VV2"`
+	Vv3     string      `json:"VV3"`
+}
