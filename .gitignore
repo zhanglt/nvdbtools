@@ -16,3 +16,5 @@ nvdbtools
 /test/*
 test
 *.db
+cnvd20230428.db
+

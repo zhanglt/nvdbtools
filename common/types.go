@@ -210,3 +210,29 @@ type Apps struct {
 	Vv2     string      `json:"VV2"`
 	Vv3     string      `json:"VV3"`
 }
+type KeyVer struct {
+	Version    string    `json:"Version"`
+	UpdateTime time.Time `json:"UpdateTime"`
+	Keys       struct {
+	} `json:"Keys"`
+	Shas struct {
+		AlpineFullTb   string `json:"alpine_full.tb"`
+		AlpineIndexTb  string `json:"alpine_index.tb"`
+		AmazonFullTb   string `json:"amazon_full.tb"`
+		AmazonIndexTb  string `json:"amazon_index.tb"`
+		AppsTb         string `json:"apps.tb"`
+		CentosFullTb   string `json:"centos_full.tb"`
+		CentosIndexTb  string `json:"centos_index.tb"`
+		DebianFullTb   string `json:"debian_full.tb"`
+		DebianIndexTb  string `json:"debian_index.tb"`
+		MarinerFullTb  string `json:"mariner_full.tb"`
+		MarinerIndexTb string `json:"mariner_index.tb"`
+		OracleFullTb   string `json:"oracle_full.tb"`
+		OracleIndexTb  string `json:"oracle_index.tb"`
+		RhelCpeMap     string `json:"rhel-cpe.map"`
+		SuseFullTb     string `json:"suse_full.tb"`
+		SuseIndexTb    string `json:"suse_index.tb"`
+		UbuntuFullTb   string `json:"ubuntu_full.tb"`
+		UbuntuIndexTb  string `json:"ubuntu_index.tb"`
+	} `json:"Shas"`
+}

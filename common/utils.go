@@ -29,14 +29,16 @@ func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) {
 	//写入文件时，使用带缓存的 *Writer
 	write := bufio.NewWriter(file)
 
-	buf := bufio.NewScanner(fp)
+	scanner := bufio.NewScanner(fp)
+	buf := make([]byte, 0, bufio.MaxScanTokenSize*10) //根据自己的需要调整这个倍数
+	scanner.Buffer(buf, cap(buf))
 	if structType == "apps" {
 
 		for {
-			if !buf.Scan() {
+			if !scanner.Scan() {
 				break //文件读完了,退出for
 			}
-			line := buf.Text() //获取每一行
+			line := scanner.Text() //获取每一行
 			var apps *Apps = new(Apps)
 			err := json.Unmarshal(s2b(line), apps)
 			if err != nil {
@@ -48,17 +50,19 @@ func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) {
 			data, err := json.Marshal(&apps)
 			write.WriteString(fmt.Sprintf("%s\n", data))
 
-			log.Println("cvd id =======:", apps.Vn)
+			//log.Println("cvd id =======:", apps.Vn)
 		}
+		//Flush将缓存的文件真正写入到文件中
+		err = write.Flush()
 
 	} else {
-		structData := new(Centos)
+
 		for {
-			if !buf.Scan() {
+			if !scanner.Scan() {
 				break //文件读完了,退出for
 			}
-			line := buf.Text() //获取每一行
-
+			line := scanner.Text() //获取每一行
+			var structData *Centos = new(Centos)
 			err := json.Unmarshal(s2b(line), structData)
 
 			if err != nil {

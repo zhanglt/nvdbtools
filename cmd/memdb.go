@@ -1,10 +1,9 @@
-package main
+package cmd
 
 import (
 	"bufio"
 	"bytes"
 	"crypto/sha256"
-	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,39 +17,6 @@ import (
 	// utils "github.com/zhanglt/nvdbtools/share"
 	"github.com/neuvector/neuvector/share/utils"
 )
-
-var DB *sql.DB
-var err error
-
-func init() {
-	//打开 cnvd数据库
-	DB, err = sql.Open("sqlite3", "cnvd20230428.db")
-	if err != nil {
-		panic(err)
-	}
-	err = DB.Ping()
-	if err != nil {
-		return
-	}
-	DB.SetMaxOpenConns(200)                 //最大连接数
-	DB.SetMaxIdleConns(10)                  //连接池里最大空闲连接数。必须要比maxOpenConns小
-	DB.SetConnMaxLifetime(time.Second * 10) //最大存活保持时间
-	DB.SetConnMaxIdleTime(time.Second * 10) //最大空闲保持时间
-
-}
-
-// 更具cve编号 搜索在cnvd中的中文说明
-func getDescribe(db *sql.DB, cveid string, srcDescribe string) string {
-	var number, title, serverity, products, isEvent, submitTime, openTime, discovererName, referenceLink, formalWay, description, patchDescription, patchName, cveNumber, bids, cveUrl, cves sql.NullString
-	rows := db.QueryRow("SELECT * FROM cnvd20230428 where cveNumber=$1", cveid)
-	err = rows.Scan(&number, &title, &serverity, &products, &isEvent, &submitTime, &openTime, &discovererName, &referenceLink, &formalWay, &description, &patchDescription, &patchName, &cveNumber, &bids, &cveUrl, &cves)
-	if err != nil {
-		//	log.Debug("cve ID:", cveid, "数据库中没有搜索到:", err)
-		return srcDescribe
-	}
-
-	return description.String
-}
 
 type RawFile struct {
 	Name string
@@ -107,7 +73,7 @@ type dbSpace struct {
 	rawSHA  [][sha256.Size]byte
 }
 
-func (db *memDB) RewriteDb(version string, srcPath string) bool {
+func (db *memDB) RewriteDb(version, srcPath string) bool {
 	// if len(db.vuls) == 0 {
 	// 		log.Errorf("CVE update FAIL")
 	// 		return false
@@ -275,7 +241,6 @@ func readCveData(fileName string) ([]byte, error) {
 		log.Println("readall  error:", err)
 		return nil, err
 	}
-	//log.Println("是否为有效json格式:", fileName, "json格式:", validator.Valid(body))
 	return body, nil
 }
 func (db *memDB) Close() {

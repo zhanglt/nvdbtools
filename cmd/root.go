@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/zhanglt/nvdbtools/common"
 	//"github.com/vul-dbgen/common"
 )
 
@@ -36,9 +35,4 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-}
-
-func dbTofile(file *common.DBFile) string {
-
-	return ""
 }
