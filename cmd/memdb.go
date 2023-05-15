@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bufio"
 	"bytes"
 	"crypto/sha256"
 	"fmt"
@@ -12,10 +11,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	log "github.com/sirupsen/logrus"
 
-	//"github.com/vul-dbgen/updater"
-	"github.com/zhanglt/nvdbtools/common"
-	// utils "github.com/zhanglt/nvdbtools/share"
 	"github.com/neuvector/neuvector/share/utils"
+	"github.com/zhanglt/nvdbtools/common"
 )
 
 type RawFile struct {
@@ -30,14 +27,6 @@ type memDB struct {
 	vuls     map[string]common.VulFull
 	appVuls  []common.AppModuleVul
 	rawFiles []RawFile
-}
-
-func newMemDb() (*memDB, error) {
-	var db memDB
-	db.vuls = make(map[string]common.VulFull, 0)
-	db.keyVer.Keys = make(map[string]string, 0)
-	db.keyVer.Shas = make(map[string]string, 0)
-	return &db, nil
 }
 
 var rawFilenames []string = []string{
@@ -73,7 +62,7 @@ type dbSpace struct {
 	rawSHA  [][sha256.Size]byte
 }
 
-func (db *memDB) RewriteDb(version, srcPath string) bool {
+func (db *memDB) RebuildDb(version, srcPath string) bool {
 	// if len(db.vuls) == 0 {
 	// 		log.Errorf("CVE update FAIL")
 	// 		return false
@@ -88,7 +77,6 @@ func (db *memDB) RewriteDb(version, srcPath string) bool {
 	dbs.buffers[dbMariner] = dbBuffer{namespace: "mariner", indexFile: "mariner_index.tb", fullFile: "mariner_full.tb"}
 	dbs.buffers[dbSuse] = dbBuffer{namespace: "sles", indexFile: "suse_index.tb", fullFile: "suse_full.tb"}
 
-	//dbs.rawSHA = make([][sha256.Size]byte, len(db.rawFiles))
 	ok := loadDbs(db, &dbs, srcPath)
 	if !ok {
 		log.Error("load database error")
@@ -214,9 +202,10 @@ func loadDbs(db *memDB, dbs *dbSpace, srcPath string) bool {
 }
 
 func memdbOpen(path string) (*memDB, error) {
+	// 创建临时目录
 	dir, err := ioutil.TempDir("", "cve")
 	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("Failed to create tmp cve directory")
+		log.WithFields(log.Fields{"error": err}).Error("创建临时CVE目录失败")
 		return nil, err
 	}
 	var db memDB
@@ -232,27 +221,17 @@ func memdbOpen(path string) (*memDB, error) {
 func readCveData(fileName string) ([]byte, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
-		log.Println("file open error:", err)
+		log.Println("文件打开", fileName, "错误:", err)
 		return nil, err
 	}
 	defer f.Close()
 	body, err := ioutil.ReadAll(f)
 	if err != nil {
-		log.Println("readall  error:", err)
+		log.Println("读取", fileName, "文件错误:", err)
 		return nil, err
 	}
 	return body, nil
 }
 func (db *memDB) Close() {
 	os.RemoveAll(db.tmpPath)
-}
-
-func cveDescrition(str string) string {
-	buf := bytes.NewBufferString(str)
-	scanner := bufio.NewScanner(buf)
-	newBuf := bytes.Buffer{}
-	for scanner.Scan() {
-		newBuf.WriteString(scanner.Text())
-	}
-	return newBuf.String()
 }

@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 NAME HERE <kitsdk@163.com>
 */
 package cmd
 
@@ -7,10 +7,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	//"github.com/vul-dbgen/common"
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "nvdbtools",
 	Short: "nv数据库转换工具",
@@ -32,7 +30,7 @@ func init() {
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nvdbtools.yaml)")
 
 	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// when this action(cn(cn(cnvd202(ccreatedb28) is called directly.
+	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }
