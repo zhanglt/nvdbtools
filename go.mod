@@ -3,6 +3,7 @@ module github.com/zhanglt/nvdbtools
 go 1.19
 
 require (
+	github.com/beevik/etree v1.2.0
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/neuvector/neuvector v5.0.0-preview.1+incompatible
 	github.com/sirupsen/logrus v1.9.0
