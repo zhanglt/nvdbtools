@@ -28,16 +28,11 @@ var updescriptionCmd = &cobra.Command{
 		full := []string{"alpine_full.tb", "amazon_full.tb", "centos_full.tb", "debian_full.tb", "mariner_full.tb", "oracle_full.tb", "suse_full.tb", "ubuntu_full.tb"}
 		index := []string{"alpine_index.tb", "amazon_index.tb", "centos_index.tb", "debian_index.tb", "mariner_index.tb", "oracle_index.tb", "suse_index.tb", "ubuntu_index.tb"}
 		// 打开cnvd数据
-		DB, err := sql.Open("sqlite3", "cnvd20230428.db")
+		DB, err := getDB()
 		if err != nil {
-			log.Println("数据(cnvd20230428)打开错误：", err)
-			return
-			err = DB.Ping()
-			if err != nil {
-				log.Println("数据库(cnvd20230428)测试错误：", err)
-				return
-			}
+			log.Println("获取sqldb数据库错误:", err)
 		}
+
 		for _, file := range full {
 			// 更新full数据
 			common.UpdateDescription(unzipPath+file, targetPath+file, "full", DB)
@@ -78,4 +73,18 @@ func CopyFile(dstFilePath string, srcFilePath string) (written int64, err error)
 	writer := bufio.NewWriter(dstFile)
 	defer dstFile.Close()
 	return io.Copy(writer, reader)
+}
+func getDB() (*sql.DB, error) {
+	DB, err := sql.Open("sqlite3", "cnnvd.db")
+	if err != nil {
+		log.Println("数据(cnnvd.db)打开错误：", err)
+		return nil, err
+		err = DB.Ping()
+		if err != nil {
+			log.Println("数据库(cnnvd.db)测试错误：", err)
+			return nil, err
+		}
+	}
+
+	return DB, nil
 }
