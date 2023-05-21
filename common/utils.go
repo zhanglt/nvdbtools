@@ -12,17 +12,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) {
+func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) error {
 	var i int
 	fp, err := os.Open(srcFile)
 	if err != nil {
 		fmt.Println(err) //打开文件错误
-		return
+		return err
 	}
 	defer fp.Close()
 	file, err := os.OpenFile(targetFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("文件打开失败", err)
+		return err
 	}
 	//及时关闭file句柄
 	defer file.Close()
@@ -82,6 +83,7 @@ func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) {
 
 	//Flush将缓存的文件真正写入到文件中
 	err = write.Flush()
+	return err
 
 }
 
@@ -95,7 +97,7 @@ func getDescribe(db *sql.DB, cveid string, srcDescribe string) string {
 		//log.Println("cve ID:", cveid, "数据库中没有搜索到:", err)
 		return srcDescribe
 	}
-	log.Println("查到中文说明：", cveid)
+	//log.Println("查到中文说明：", cveid)
 	return vuln_descript.String
 
 }
