@@ -25,23 +25,37 @@ var updescriptionCmd = &cobra.Command{
 		unzipPath, _ := cmd.Flags().GetString("unzipPath")
 		// 获取更新description之后的文件存放路径
 		targetPath, _ := cmd.Flags().GetString("targetPath")
+		os.RemoveAll(targetPath)
+		os.MkdirAll(targetPath, 0755)
 		full := []string{"alpine_full.tb", "amazon_full.tb", "centos_full.tb", "debian_full.tb", "mariner_full.tb", "oracle_full.tb", "suse_full.tb", "ubuntu_full.tb"}
 		index := []string{"alpine_index.tb", "amazon_index.tb", "centos_index.tb", "debian_index.tb", "mariner_index.tb", "oracle_index.tb", "suse_index.tb", "ubuntu_index.tb"}
 		// 打开cnvd数据
 		DB, err := getDB()
 		if err != nil {
-			log.Println("获取sqldb数据库错误:", err)
+			log.Println("获取sqlit db数据库错误:", err)
 		}
 
 		for _, file := range full {
 			// 更新full数据
-			common.UpdateDescription(unzipPath+file, targetPath+file, "full", DB)
+			err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", DB)
+			if err != nil {
+				log.Println("文件更新完毕:", targetPath+file)
+			} else {
+				log.Println(unzipPath+file, "数据文件更新(cve说明)错误：", err)
+			}
+
 		}
 		// 更新apps数据
-		common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", DB)
+		err = common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", DB)
+		if err != nil {
+			log.Println("文件更新完毕:", targetPath+"apps.tb")
+		} else {
+			log.Println(unzipPath+"apps.tb", "数据文件更新(cve说明)错误：", err)
+		}
 		for _, file := range index {
 			// 复制 index数据文件到目标路径
 			CopyFile(targetPath+file, unzipPath+file)
+			log.Println("文件更新完毕:", targetPath+file)
 		}
 		// 复制 cpe数据到目标路径
 		CopyFile(targetPath+"rhel-cpe.map", unzipPath+"rhel-cpe.map")
