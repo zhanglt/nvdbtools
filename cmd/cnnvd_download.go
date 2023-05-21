@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/zhanglt/nvdbtools/cnnvd"
 )
+
+var rex string = "s/<vuln-descript>/<vuln-descript><![CDATA[/g;s%</vuln-descript>%]]></vuln-descript>%g;s/&/&amp;/g"
 
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
@@ -62,6 +65,12 @@ var downloadCmd = &cobra.Command{
 			select {
 			case res := <-ch:
 				nt := time.Now().Format("2006-01-02 15:04:05")
+				// 处理文件中的特殊字符
+				command := exec.Command("sed", "-i", rex, savePath+res+".xml")
+				_, err := command.CombinedOutput()
+				if err != nil {
+					fmt.Printf("[%s]文件%s%s.xml预处理错误:%s\n", nt, savePath, res, err)
+				}
 				fmt.Printf("[%s]完成下载：%s%s.xml\n", nt, savePath, res)
 			case <-timeout:
 				fmt.Println("超时...:", savePath+".xml")
