@@ -118,6 +118,8 @@ func UNzipDb(nvCvedbPath, nvUnzipPath string) error {
 	if err != nil {
 		log.WithFields(log.Fields{"error": err}).Error("Write keys file error")
 		return err
+	} else {
+		log.Println("keys文件解压完成")
 	}
 
 	// Read the rest of DB
