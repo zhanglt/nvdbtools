@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"sync"
@@ -52,8 +51,12 @@ var importDBCmd = &cobra.Command{
 				//因为初始化的这些互斥锁默认就已经被锁住了，所以这里创建的子协程都会被阻塞
 				//一旦获取到锁，就执行逻辑，最后将当前index的锁和index+1的锁释放，这样正在等待 index +1 位置的锁的子协程就可以继续执行了
 				cc[index].Lock()
-				fmt.Printf("this value is %d \n", index)
-				cnnvd.BuildCVE(filePath+xmlList[index].Name(), dbName)
+				f, err := cnnvd.BuildCVE(filePath+xmlList[index].Name(), dbName)
+				if err != nil {
+					log.Printf("%s文件导入错误:%s/n", f, err)
+				} else {
+					log.Println("文件导入完成:", f)
+				}
 				cc[index].Unlock()
 				cc[index+1].Unlock()
 			}(i, db)
