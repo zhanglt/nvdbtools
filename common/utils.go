@@ -87,16 +87,16 @@ func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) {
 
 // 更具cve编号 搜索在cnvd中的中文说明
 func getDescribe(db *sql.DB, cveid string, srcDescribe string) string {
-	var description, cveNumber sql.NullString
-	rows := db.QueryRow("SELECT description, cveNumber FROM cnvd20230428 where cveNumber=$1", cveid)
-	err := rows.Scan(&description, &cveNumber)
+	var vuln_descript, other_id_cve_id sql.NullString
+	rows := db.QueryRow("SELECT vuln_descript, other_id_cve_id FROM cnnvd where other_id_cve_id=$1", cveid)
+	err := rows.Scan(&vuln_descript, &other_id_cve_id)
 	if err != nil {
 		//log.Println("没有查到中文说明：", cveid)
 		//log.Println("cve ID:", cveid, "数据库中没有搜索到:", err)
 		return srcDescribe
 	}
 	log.Println("查到中文说明：", cveid)
-	return description.String
+	return vuln_descript.String
 
 }
 func s2b(s string) []byte {
