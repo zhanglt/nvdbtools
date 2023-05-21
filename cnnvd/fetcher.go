@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -51,7 +50,6 @@ CREATE TABLE [cnnvd] (
 [other_id_cve_id] varchar(255)
 );
 CREATE INDEX cnnvd_other_id_cve_id_IDX ON cnnvd (other_id_cve_id);
-CREATE INDEX cnnvd_vuln_descript_IDX ON cnnvd (vuln_descript);
 `
 var index_id string = "CREATE INDEX cnnvd_other_id_cve_id_IDX ON cnnvd (other_id_cve_id)"
 var index_desc string = "CREATE INDEX cnnvd_vuln_descript_IDX ON cnnvd (vuln_descript)"
@@ -67,7 +65,7 @@ func GetIDlist() ([]string, error) {
 	reqParam, err := json.Marshal(&Rplist{Index: 1, Size: 100})
 
 	if err != nil {
-		log.Fatalln("Marshal RequestParam fail, err:%v", err)
+		log.Fatalln("cnnvd数据文件id列表masrshal错误:%v", err)
 		return nil, err
 	}
 
@@ -75,7 +73,7 @@ func GetIDlist() ([]string, error) {
 
 	r, err := http.NewRequest("POST", urlList, rb)
 	if err != nil {
-		log.Fatalln("NewRequest fail, url: %s, reqBody: %s, err: %v", urlList, rb, err)
+		log.Fatalln("创建rquest错误 url: %s, reqBody: %s, err: %v", urlList, rb, err)
 		return nil, err
 	}
 	r.Header.Add("Content-Type", "application/json")
@@ -83,7 +81,7 @@ func GetIDlist() ([]string, error) {
 	// DO: HTTP请求
 	rs, err := http.DefaultClient.Do(r)
 	if err != nil {
-		log.Println("do http fail, url: %s, reqBody: %s, err:%v", urlList, rb, err)
+		log.Println("http.Do获取数据错误, url: %s, reqBody: %s, err:%v", urlList, rb, err)
 		return nil, err
 
 	}
@@ -91,13 +89,13 @@ func GetIDlist() ([]string, error) {
 	// Read: HTTP结果
 	rspBody, err := ioutil.ReadAll(rs.Body)
 	if err != nil {
-		log.Println("ReadAll failed, url: %s, reqBody: %s, err: %v", urlList, rb, err)
+		log.Println("ReadAll读取数据错误, url: %s, reqBody: %s, err: %v", urlList, rb, err)
 		return nil, err
 
 	}
 	var result cnnvdList
 	if err = json.Unmarshal(rspBody, &result); err != nil {
-		log.Println("Unmarshal fail, err:%v", err)
+		log.Println("Unmarshal错误:%v", err)
 		return nil, err
 
 	}
@@ -116,7 +114,7 @@ func GetXml(fid, token, savePath string) string {
 	rpxml, err := json.Marshal(&Rpxml{ID: fid, FileType: 1})
 
 	if err != nil {
-		log.Fatalln("Marshal RequestParam fail, err:%v", err)
+		log.Fatalln("Marshal 错误:%v", err)
 		return ""
 	}
 
@@ -124,7 +122,7 @@ func GetXml(fid, token, savePath string) string {
 
 	r, err := http.NewRequest("POST", urlXml, rb)
 	if err != nil {
-		log.Fatalln("NewRequest fail, url: %s, reqBody: %s, err: %v", urlXml, rb, err)
+		log.Fatalln("创建rquest错误, url: %s, reqBody: %s, err: %v", urlXml, rb, err)
 		return ""
 	}
 	r.Header.Add("Content-Type", "application/json")
@@ -135,7 +133,7 @@ func GetXml(fid, token, savePath string) string {
 	// DO: HTTP请求
 	rs, err := http.DefaultClient.Do(r)
 	if err != nil {
-		log.Println("do http fail, url: %s, reqBody: %s, err:%v", urlXml, rb, err)
+		log.Println("http.Do获取数据错误, url: %s, reqBody: %s, err:%v", urlXml, rb, err)
 		return ""
 
 	}
@@ -185,76 +183,67 @@ type Cnnvd struct {
 	} `xml:"entry"`
 }
 
-func BuildCVE(fileXml string, db *sql.DB) error {
+func BuildCVE(fileXml string, db *sql.DB) (string, error) {
 	var i int
 	var id, description, vulnid string
+	//var description ,description string
 	doc := etree.NewDocument()
 	if err := doc.ReadFromFile(fileXml); err != nil {
 
 		log.Println("解析XML文件", fileXml, "错误:", err)
-		return err
+		return fileXml, err
 	}
 	root := doc.SelectElement("cnnvd")
-
+	// 开始数据库事务
+	tx, _ := db.Begin()
 	for _, entry := range root.SelectElements("entry") {
 		i = i + 1
 		//fmt.Println("CHILD element:", book.Tag)
 		if desc := entry.SelectElement("vuln-descript"); desc != nil {
 			//lang := title.SelectAttrValue("lang", "unknown")
-			fmt.Printf("  Description: %s\n", desc.Text())
+			//fmt.Printf("  Description: %s\n", desc.Text())
 			description = desc.Text()
 		}
-		if vid := entry.SelectElement("vuln-descript"); vid != nil {
+		if vid := entry.SelectElement("vuln-id"); vid != nil {
 			//lang := title.SelectAttrValue("lang", "unknown")
-			fmt.Printf("  vuln_id: %s\n", vid.Text())
+			//fmt.Printf("  vuln_id: %s\n", vid.Text())
 			vulnid = vid.Text()
 		}
 
 		for _, cveid := range entry.SelectElements("other-id") {
 			if cveid := cveid.SelectElement("cve-id"); cveid != nil {
-				fmt.Printf("CVEID:%s\n", cveid.Text())
+				//fmt.Printf("CVEID:%s\n", cveid.Text())
 				id = cveid.Text()
 			}
 		}
-		err := InsertDB(db, vulnid, description, id)
-		if err != nil {
-			return err
-		}
+
+		tx.Exec("insert into cnnvd (other_id_cve_id,vuln_id, vuln_descript ) values(?,?,?)", id, vulnid, description)
 	}
-	fmt.Println("更新文档数量：", i)
-	return nil
+	// 事务提交
+	tx.Commit()
+	log.Println("导入文档数量：", i)
+	return fileXml, nil
 }
 func GetDB() (*sql.DB, error) {
-	DB, err := sql.Open("sqlite3", "cnvd20230428.db")
+	DB, err := sql.Open("sqlite3", "cnnvd.db")
 	if err != nil {
-		log.Println("数据(cnvd20230428)打开错误：", err)
+		log.Println("数据(cnnvd.db)打开错误：", err)
 		return nil, err
 		err = DB.Ping()
 		if err != nil {
-			log.Println("数据库(cnvd20230428)测试错误：", err)
+			log.Println("数据库(cnnvd.db)测试错误：", err)
 			return nil, err
 		}
 	}
 
 	_, err = DB.Exec(tableInit)
+	// 在不开启事务时提升数据插入性能
+	DB.Exec("PRAGMA synchronous = 0;PRAGMA journal_mode = OFF")
 	if err != nil {
 		log.Println("初始化数据表错误", ":", err)
 		return nil, err
 	}
+	//DB.exec(fmt.Sprintf("PRAGMA synchronous = OFF;"))
 
 	return DB, nil
-}
-func InsertDB(db *sql.DB, vid, description, cid string) error {
-	sql := `insert into cnnvd (vuln_id, vuln_descript,other_id_cve_id ) values(?,?,?,?)`
-	stmt, err := db.Prepare(sql)
-	if err != nil {
-		log.Println("stmt错误", err)
-		return err
-	}
-	_, err = stmt.Exec(vid, description, cid)
-	if err != nil {
-		log.Println("数据插入错误(", vid, "):", err)
-		return err
-	}
-	return nil
 }
