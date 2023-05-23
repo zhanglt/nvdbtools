@@ -5,7 +5,6 @@ package cve
 
 import (
 	"log"
-	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/zhanglt/nvdbtools/common"
@@ -29,13 +28,12 @@ var unzipCmd = &cobra.Command{
 			log.Println("请输入正确unzipPath")
 			return
 		}
-		os.RemoveAll(unzipPath)
-		os.MkdirAll(unzipPath, 0755)
+		common.ResetPath(unzipPath)
 		// 解压cvedb数据库
 		if err := common.UNzipDb(cvedbPath, unzipPath); err == nil {
 			log.Println("cvedb数据库解压完成")
 		} else {
-			log.Println("cvedb数据库解压失败")
+			log.Fatalln("cvedb数据库解压失败:", err)
 			return
 		}
 	},

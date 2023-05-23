@@ -20,13 +20,13 @@ import (
 )
 
 func CreateDBFile(dbFile *DBFile) error {
-	log.WithFields(log.Fields{"file": dbFile.Filename}).Info("Create database file")
+	log.WithFields(log.Fields{"文件": dbFile.Filename}).Info("创建cvedb数据库文件")
 
 	header, _ := json.Marshal(dbFile.Key)
 
 	buf, err := utils.MakeTar(dbFile.Files)
 	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("Make tar file error")
+		log.WithFields(log.Fields{"错误": err}).Error("tar打包错误")
 		return err
 	}
 	zb := utils.GzipBytes(buf.Bytes())
@@ -34,7 +34,7 @@ func CreateDBFile(dbFile *DBFile) error {
 	// Use local encrypt function
 	cipherData, err := encrypt(zb, getCVEDBEncryptKey())
 	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("Encrypt tar file fail")
+		log.WithFields(log.Fields{"错误": err}).Error("加密tar文件错误")
 		return err
 	}
 
@@ -49,18 +49,18 @@ func CreateDBFile(dbFile *DBFile) error {
 	// write to db file
 	fdb, err := os.Create(dbFile.Filename)
 	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Error("Create db file fail")
+		log.WithFields(log.Fields{"错误": err}).Error("创建db文件错误")
 		return err
 	}
 	defer fdb.Close()
 
 	n, err := fdb.Write(allb.Bytes())
 	if err != nil || n != allb.Len() {
-		log.WithFields(log.Fields{"error": err}).Error("Write file error")
+		log.WithFields(log.Fields{"错误": err}).Error("写文件错误")
 		return err
 	}
 
-	log.WithFields(log.Fields{"file": dbFile.Filename, "size": allb.Len()}).Info("Create database done")
+	log.WithFields(log.Fields{"文件": dbFile.Filename, "size": allb.Len()}).Info("打包数据库完毕")
 	return nil
 }
 

@@ -61,11 +61,13 @@ type dbSpace struct {
 	rawSHA  [][sha256.Size]byte
 }
 
+// 用更新后的数据重新打包cvedb文件
 func (db *memDB) RebuildDb(version, srcPath string) bool {
 	// if len(db.vuls) == 0 {
 	// 		log.Errorf("CVE update FAIL")
 	// 		return false
 	// 	}
+	// 初始化dbBuffer切片
 	var dbs dbSpace
 	dbs.buffers[dbUbuntu] = dbBuffer{namespace: "ubuntu", indexFile: "ubuntu_index.tb", fullFile: "ubuntu_full.tb"}
 	dbs.buffers[dbDebian] = dbBuffer{namespace: "debian", indexFile: "debian_index.tb", fullFile: "debian_full.tb"}
@@ -75,10 +77,10 @@ func (db *memDB) RebuildDb(version, srcPath string) bool {
 	dbs.buffers[dbOracle] = dbBuffer{namespace: "oracle", indexFile: "oracle_index.tb", fullFile: "oracle_full.tb"}
 	dbs.buffers[dbMariner] = dbBuffer{namespace: "mariner", indexFile: "mariner_index.tb", fullFile: "mariner_full.tb"}
 	dbs.buffers[dbSuse] = dbBuffer{namespace: "sles", indexFile: "suse_index.tb", fullFile: "suse_full.tb"}
-
+	// 为dbBuffer切片载入数据
 	ok := loadDbs(db, &dbs, srcPath)
 	if !ok {
-		log.Error("load database error")
+		log.Error("tb数据载入失败")
 		return false
 	}
 
@@ -154,6 +156,7 @@ func (db *memDB) RebuildDb(version, srcPath string) bool {
 	}
 
 	for _, dbf := range []*DBFile{&compactDB, &regularDB} {
+		// 写入文件
 		CreateDBFile(dbf)
 	}
 
@@ -162,21 +165,25 @@ func (db *memDB) RebuildDb(version, srcPath string) bool {
 func loadDbs(db *memDB, dbs *dbSpace, srcPath string) bool {
 
 	for i := 0; i < dbMax; i++ {
+		// 获取指针多
 		buf := &dbs.buffers[i]
+		// 用index文件填充 indexbuf
 		if index, err := readCveData(srcPath + buf.indexFile); err == nil {
 			buf.indexBuf.WriteString(fmt.Sprintf("%s", index)) //%s之后不要加\n
 		} else {
 			log.Println("读入:", buf.indexFile, "文件错误:", err)
 		}
-
+		// 用full文件填充 fullbuf
 		if full, err := readCveData(srcPath + buf.fullFile); err == nil {
 			buf.fullBuf.WriteString(fmt.Sprintf("%s", full)) //%s之后不要加\n
 		} else {
 			log.Println("读入:", buf.fullFile, "文件错误:", err)
 		}
+		// 填充SHA
 		buf.indexSHA = sha256.Sum256(buf.indexBuf.Bytes())
 		buf.fullSHA = sha256.Sum256(buf.fullBuf.Bytes())
 	}
+	// 用apps.tb文件填充 appbuf
 	if app, err := readCveData(srcPath + "apps.tb"); err == nil {
 		dbs.appBuf.WriteString(fmt.Sprintf("%s", app)) //%s之后不要加\n
 	} else {
@@ -200,6 +207,7 @@ func loadDbs(db *memDB, dbs *dbSpace, srcPath string) bool {
 	return true
 }
 
+// path: cvedb重新打包后的存放目录
 func MemdbOpen(path string) (*memDB, error) {
 	// 创建临时目录
 	dir, err := ioutil.TempDir("", "cve")
@@ -208,15 +216,17 @@ func MemdbOpen(path string) (*memDB, error) {
 		return nil, err
 	}
 	var db memDB
-	db.tbPath = path
+	db.tbPath = path //cvedb重新打包后的存放目录
 	db.tmpPath = dir
-	db.vuls = make(map[string]VulFull, 0)
+	db.vuls = make(map[string]VulFull, 0) //存储cve数据切片
 	db.keyVer.Keys = make(map[string]string, 0)
 	db.keyVer.Shas = make(map[string]string, 0)
 
 	return &db, nil
 
 }
+
+// 将cve数据读入字节切片
 func readCveData(fileName string) ([]byte, error) {
 	f, err := os.Open(fileName)
 	if err != nil {

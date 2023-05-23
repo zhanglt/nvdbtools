@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 NAME HERE <kitsdk@163.com>
 */
 package cve
 
@@ -26,14 +26,18 @@ var rebuildCmd = &cobra.Command{
 		os.MkdirAll(dbPath, 0755)
 
 		// 获取打包源文件路径
-		srcPath, _ := cmd.Flags().GetString("srcPath")
+		srcPath, err := cmd.Flags().GetString("srcPath")
+		if err != nil {
+			log.Fatalln("获取源文件路径错误", err)
+			return
+		}
 		db, err := common.MemdbOpen(dbPath)
 		if err != nil {
 			log.Fatalln("数据库初始化错误", err)
 			return
 		}
 		defer db.Close()
-		//  从keys文件中获取当前cvedb的版本号
+		//  从key文件中获取当前cvedb的版本号
 		kver, err := getVersion(srcPath + "keys")
 		if err != nil {
 			log.Fatalln("获取数据版本错误:", err)
@@ -41,7 +45,7 @@ var rebuildCmd = &cobra.Command{
 		}
 		// 打包数据库
 		if db.RebuildDb(kver, srcPath) {
-			log.Println("cvedb重新打包成功，文件保存在目录:", dbPath)
+			log.Println("cvedb重新打包成功,文件保存在目录:", dbPath)
 		} else {
 			log.Fatal("cvedb重新打包失败")
 			return
@@ -55,6 +59,8 @@ func init() {
 	rebuildCmd.Flags().StringP("dbPath", "d", "/tmp/nvdbtools/cvedbtemp/", "重新打包cvedb的存放目录")
 	rebuildCmd.Flags().StringP("srcPath", "s", "/tmp/nvdbtools/cvedbtarget/", "cvedb解压后的目录")
 }
+
+// 从解压出来的key文件中读取cvedb版本号
 func getVersion(keyFile string) (string, error) {
 	byteValue, err := ioutil.ReadFile(keyFile)
 	if err != nil {
@@ -63,6 +69,7 @@ func getVersion(keyFile string) (string, error) {
 	var result common.KeyVer
 	err = json.Unmarshal(byteValue, &result)
 	if err != nil {
+		log.Fatalln("获取数据版本号错误", err)
 		return "", err
 	}
 	return result.Version, nil

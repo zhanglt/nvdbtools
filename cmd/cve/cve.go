@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 NAME HERE <kitsdk@163.com>
 */
 package cve
 
@@ -11,7 +11,10 @@ import (
 var CveCmd = &cobra.Command{
 	Use:   "cve",
 	Short: "实现scanner的cvedb数据库相关操作",
-	Long:  `实现scanner的cvedb数据库相关操作；包三个命令1、解压cvedb数据库;2、更新解压后的数据;3、重新做数据打包成cvedb`,
+	Long: `实现scanner的cvedb数据库相关操作包三个命令
+	1、解压cvedb数据库;
+	2、更新解压后的数据;
+	3、重新做数据打包成cvedb`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

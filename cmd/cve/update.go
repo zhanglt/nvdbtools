@@ -6,7 +6,6 @@ package cve
 import (
 	"bufio"
 	"database/sql"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -26,6 +25,7 @@ var updateCmd = &cobra.Command{
 		unzipPath, _ := cmd.Flags().GetString("unzipPath")
 		// 获取更新description之后的文件存放路径
 		targetPath, _ := cmd.Flags().GetString("targetPath")
+		// 初始化目录
 		os.RemoveAll(targetPath)
 		os.MkdirAll(targetPath, 0755)
 		full := []string{"alpine_full.tb", "amazon_full.tb", "centos_full.tb", "debian_full.tb", "mariner_full.tb", "oracle_full.tb", "suse_full.tb", "ubuntu_full.tb"}
@@ -40,7 +40,7 @@ var updateCmd = &cobra.Command{
 			// 更新full数据
 			err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", DB)
 			if err != nil {
-				log.Println(unzipPath+file, "数据文件更新(cve说明)错误：", err)
+				log.Fatalln(unzipPath+file, "数据文件更新(cve说明)错误：", err)
 			} else {
 				log.Println("文件更新完毕:", targetPath+file)
 			}
@@ -49,7 +49,7 @@ var updateCmd = &cobra.Command{
 		// 更新apps数据
 		err = common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", DB)
 		if err != nil {
-			log.Println(unzipPath+"apps.tb", "数据文件更新(cve说明)错误：", err)
+			log.Fatalln(unzipPath+"apps.tb", "数据文件更新(cve说明)错误：", err)
 		} else {
 			log.Println("文件更新完毕:", targetPath+"apps.tb")
 		}
@@ -62,7 +62,7 @@ var updateCmd = &cobra.Command{
 		CopyFile(targetPath+"rhel-cpe.map", unzipPath+"rhel-cpe.map")
 		// 复制keys数据到目标路径
 		CopyFile(targetPath+"keys", unzipPath+"keys")
-		fmt.Println("cve说明更新完毕")
+		log.Println("cve说明更新完毕")
 	},
 }
 
@@ -82,7 +82,7 @@ func CopyFile(dstFilePath string, srcFilePath string) (written int64, err error)
 
 	dstFile, err := os.OpenFile(dstFilePath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		log.Println("打开目标文件错误，错误信息:", err)
+		log.Fatalln("打开目标文件错误，错误信息:", err)
 		return
 	}
 	writer := bufio.NewWriter(dstFile)
@@ -96,7 +96,7 @@ func getDB() (*sql.DB, error) {
 		return nil, err
 		err = DB.Ping()
 		if err != nil {
-			log.Println("数据库(cnnvd.db)测试错误：", err)
+			log.Fatalln("数据库(cnnvd.db)测试错误：", err)
 			return nil, err
 		}
 	}
