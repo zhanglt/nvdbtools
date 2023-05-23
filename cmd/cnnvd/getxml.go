@@ -1,7 +1,7 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cnnvd
 
 import (
 	"fmt"
@@ -14,12 +14,11 @@ import (
 	"github.com/zhanglt/nvdbtools/cnnvd"
 )
 
-// var rex string = "s/<vuln-descript>/<vuln-descript><![CDATA[/g;s%</vuln-descript>%]]></vuln-descript>%g;s/&/&amp;/g;"
 var rex string = "s/<vuln-descript>/<vuln-descript><![CDATA[/g;s%</vuln-descript>%]]></vuln-descript>%g;s/<name>/<name><![CDATA[/g;s%</name>%]]></name>%g"
 
-// downloadCmd represents the download command
-var downloadCmd = &cobra.Command{
-	Use:   "download",
+// getxmlCmd represents the getxml command
+var getxmlCmd = &cobra.Command{
+	Use:   "getxml",
 	Short: "cnnvd数据下载",
 	Long:  `从cnnvd官网下载xml数据文件`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -84,16 +83,16 @@ var downloadCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(downloadCmd)
-	downloadCmd.Flags().StringP("token", "t", "", "cnnvd官网登陆后获取的token字符串")
-	downloadCmd.Flags().StringP("savePath", "s", "/tmp/nvdbtools/xml/", "cnnvd xml数据库的保存目录")
+	CnnvdCmd.AddCommand(getxmlCmd)
+	getxmlCmd.Flags().StringP("token", "t", "", "cnnvd官网登陆后获取的token字符串")
+	getxmlCmd.Flags().StringP("savePath", "s", "/tmp/nvdbtools/xml/", "cnnvd xml数据库的保存目录")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// downloadCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// getxmlCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// downloadCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// getxmlCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

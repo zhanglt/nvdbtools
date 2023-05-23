@@ -42,15 +42,6 @@ type cnnvdList struct {
 	Time string `json:"time"`
 }
 
-var tableInit string = `
-DROP TABLE IF EXISTS cnnvd;
-CREATE TABLE [cnnvd] (
-[vuln_id] varchar(255),
-[vuln_descript] text,
-[other_id_cve_id] varchar(255)
-);
-CREATE INDEX cnnvd_other_id_cve_id_IDX ON cnnvd (other_id_cve_id);
-`
 var index_id string = "CREATE INDEX cnnvd_other_id_cve_id_IDX ON cnnvd (other_id_cve_id)"
 var index_desc string = "CREATE INDEX cnnvd_vuln_descript_IDX ON cnnvd (vuln_descript)"
 var urlList string = "https://www.cnnvd.org.cn/web/vulDataDownload/getPageList"
@@ -223,27 +214,4 @@ func BuildCVE(fileXml string, db *sql.DB) (string, error) {
 	tx.Commit()
 	log.Println("导入文档数量：", i)
 	return fileXml, nil
-}
-func GetDB() (*sql.DB, error) {
-	DB, err := sql.Open("sqlite3", "cnnvd.db")
-	if err != nil {
-		log.Println("数据(cnnvd.db)打开错误：", err)
-		return nil, err
-		err = DB.Ping()
-		if err != nil {
-			log.Println("数据库(cnnvd.db)测试错误：", err)
-			return nil, err
-		}
-	}
-
-	_, err = DB.Exec(tableInit)
-	// 在不开启事务时提升数据插入性能
-	DB.Exec("PRAGMA synchronous = 0;PRAGMA journal_mode = OFF")
-	if err != nil {
-		log.Println("初始化数据表错误", ":", err)
-		return nil, err
-	}
-	//DB.exec(fmt.Sprintf("PRAGMA synchronous = OFF;"))
-
-	return DB, nil
 }

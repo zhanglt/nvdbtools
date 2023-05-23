@@ -16,5 +16,10 @@ nvdbtools
 /test/*
 test
 *.db
-cnvd20230428.db
-
+cnvd.db
+/google
+/google/*
+/cnnvd/test
+/cnnvd/test/*
+log.*
+log.log

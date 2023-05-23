@@ -1,7 +1,7 @@
 /*
 Copyright © 2023 NAME HERE <kitsdk@163.com>
 */
-package cmd
+package cve
 
 import (
 	"log"
@@ -11,8 +11,8 @@ import (
 	"github.com/zhanglt/nvdbtools/common"
 )
 
-var unzipcveCmd = &cobra.Command{
-	Use:   "unzipcve",
+var unzipCmd = &cobra.Command{
+	Use:   "unzip",
 	Short: "解压scanner的cvedb数据库",
 	Long:  `解压scanner的cvedb数据库`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -42,7 +42,7 @@ var unzipcveCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(unzipcveCmd)
-	unzipcveCmd.Flags().StringP("cvedbPath", "c", "/tmp/nvdbtools/cvedb", "scanner中提取的cvedb文件路径")
-	unzipcveCmd.Flags().StringP("unzipPath", "u", "/tmp/nvdbtools/cvedbsrc/", "cvedb中提取文件保存路径")
+
+	unzipCmd.Flags().StringP("cvedbPath", "c", "/tmp/nvdbtools/cvedb", "scanner中提取的cvedb文件路径")
+	unzipCmd.Flags().StringP("unzipPath", "u", "/tmp/nvdbtools/cvedbsrc/", "cvedb中提取文件保存路径")
 }

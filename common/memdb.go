@@ -1,4 +1,4 @@
-package cmd
+package common
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/neuvector/neuvector/share/utils"
-	"github.com/zhanglt/nvdbtools/common"
 )
 
 type RawFile struct {
@@ -21,16 +20,16 @@ type RawFile struct {
 }
 
 type memDB struct {
-	keyVer   common.KeyVersion
+	keyVer   KeyVersion
 	tbPath   string
 	tmpPath  string
-	vuls     map[string]common.VulFull
-	appVuls  []common.AppModuleVul
+	vuls     map[string]VulFull
+	appVuls  []AppModuleVul
 	rawFiles []RawFile
 }
 
 var rawFilenames []string = []string{
-	common.RHELCpeMapFile,
+	RHELCpeMapFile,
 }
 
 const (
@@ -83,15 +82,15 @@ func (db *memDB) RebuildDb(version, srcPath string) bool {
 		return false
 	}
 
-	var compactDB common.DBFile
-	var regularDB common.DBFile
+	var compactDB DBFile
+	var regularDB DBFile
 
 	// Compact database is consumed by scanners running inside controller. This scanner
 	// in old versions cannot parse the regular db because of the header size limit
 	// No new entries should be added !!!
 	{
 		//从/tmp/neuvector/db/keys中载入数据
-		keyVer := common.KeyVersion{
+		keyVer := KeyVersion{
 			Version:    version,
 			UpdateTime: time.Now().Format(time.RFC3339),
 			Keys:       db.keyVer.Keys,
@@ -113,14 +112,14 @@ func (db *memDB) RebuildDb(version, srcPath string) bool {
 		}
 		files = append(files, utils.TarFileInfo{"apps.tb", dbs.appBuf.Bytes()})
 
-		compactDB.Filename = db.tbPath + common.CompactCVEDBName
+		compactDB.Filename = db.tbPath + CompactCVEDBName
 		compactDB.Key = keyVer
 		compactDB.Files = files
 	}
 
 	// regular files
 	{
-		keyVer := common.KeyVersion{
+		keyVer := KeyVersion{
 			Version:    version,
 			UpdateTime: time.Now().Format(time.RFC3339),
 			Keys:       db.keyVer.Keys,
@@ -149,13 +148,13 @@ func (db *memDB) RebuildDb(version, srcPath string) bool {
 			log.WithFields(log.Fields{"database": v.Name, "size": len(v.Raw)}).Info()
 		}
 
-		regularDB.Filename = db.tbPath + common.RegularCVEDBName
+		regularDB.Filename = db.tbPath + RegularCVEDBName
 		regularDB.Key = keyVer
 		regularDB.Files = files
 	}
 
-	for _, dbf := range []*common.DBFile{&compactDB, &regularDB} {
-		common.CreateDBFile(dbf)
+	for _, dbf := range []*DBFile{&compactDB, &regularDB} {
+		CreateDBFile(dbf)
 	}
 
 	return true
@@ -201,7 +200,7 @@ func loadDbs(db *memDB, dbs *dbSpace, srcPath string) bool {
 	return true
 }
 
-func memdbOpen(path string) (*memDB, error) {
+func MemdbOpen(path string) (*memDB, error) {
 	// 创建临时目录
 	dir, err := ioutil.TempDir("", "cve")
 	if err != nil {
@@ -211,7 +210,7 @@ func memdbOpen(path string) (*memDB, error) {
 	var db memDB
 	db.tbPath = path
 	db.tmpPath = dir
-	db.vuls = make(map[string]common.VulFull, 0)
+	db.vuls = make(map[string]VulFull, 0)
 	db.keyVer.Keys = make(map[string]string, 0)
 	db.keyVer.Shas = make(map[string]string, 0)
 

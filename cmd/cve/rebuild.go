@@ -1,7 +1,7 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cve
 
 import (
 	"encoding/json"
@@ -10,12 +10,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
 	"github.com/zhanglt/nvdbtools/common"
 )
 
 // createdbCmd represents the createdb command
-var createdbCmd = &cobra.Command{
-	Use:   "createdb",
+var rebuildCmd = &cobra.Command{
+	Use:   "rebuild",
 	Short: "重新打包cvedb数据库",
 	Long:  `重新打包cvedb数据库`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -26,7 +27,7 @@ var createdbCmd = &cobra.Command{
 
 		// 获取打包源文件路径
 		srcPath, _ := cmd.Flags().GetString("srcPath")
-		db, err := memdbOpen(dbPath)
+		db, err := common.MemdbOpen(dbPath)
 		if err != nil {
 			log.Fatalln("数据库初始化错误", err)
 			return
@@ -50,9 +51,9 @@ var createdbCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(createdbCmd)
-	createdbCmd.Flags().StringP("dbPath", "d", "/tmp/nvdbtools/cvedbtemp/", "重新打包cvedb的存放目录")
-	createdbCmd.Flags().StringP("srcPath", "s", "/tmp/nvdbtools/cvedbtarget/", "cvedb解压后的目录")
+
+	rebuildCmd.Flags().StringP("dbPath", "d", "/tmp/nvdbtools/cvedbtemp/", "重新打包cvedb的存放目录")
+	rebuildCmd.Flags().StringP("srcPath", "s", "/tmp/nvdbtools/cvedbtarget/", "cvedb解压后的目录")
 }
 func getVersion(keyFile string) (string, error) {
 	byteValue, err := ioutil.ReadFile(keyFile)

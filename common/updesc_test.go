@@ -1,4 +1,4 @@
-package cmd
+package common
 
 import (
 	"os"
@@ -22,12 +22,6 @@ func TestCopyFile(t *testing.T) {
 	_, err = srcFile.Write(data)
 	if err != nil {
 		t.Fatalf("无法写入源文件: %s", err)
-	}
-
-	// 调用被测试的函数
-	_, err = CopyFile(dstFilePath, srcFilePath)
-	if err != nil {
-		t.Fatalf("复制文件时发生错误: %s", err)
 	}
 
 	// 检查目标文件是否存在

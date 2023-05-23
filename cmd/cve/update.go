@@ -1,7 +1,7 @@
 /*
 Copyright © 2023 NAME HERE <kitsdk@163.com>
 */
-package cmd
+package cve
 
 import (
 	"bufio"
@@ -13,13 +13,14 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
+
 	"github.com/zhanglt/nvdbtools/common"
 )
 
-var updescriptionCmd = &cobra.Command{
-	Use:   "updescription",
-	Short: "用cnvd数据库更新cve的说明信息",
-	Long:  `用cnvd数据库更新cve的说明信息`,
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "用cnnvd数据库更新cve的说明信息",
+	Long:  `用cnnvd数据库更新cve的说明信息,如果不在cnnvd中的数据调用google翻译引擎做翻译`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取cvedb解压后的文件路径
 		unzipPath, _ := cmd.Flags().GetString("unzipPath")
@@ -39,18 +40,18 @@ var updescriptionCmd = &cobra.Command{
 			// 更新full数据
 			err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", DB)
 			if err != nil {
-				log.Println("文件更新完毕:", targetPath+file)
-			} else {
 				log.Println(unzipPath+file, "数据文件更新(cve说明)错误：", err)
+			} else {
+				log.Println("文件更新完毕:", targetPath+file)
 			}
 
 		}
 		// 更新apps数据
 		err = common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", DB)
 		if err != nil {
-			log.Println("文件更新完毕:", targetPath+"apps.tb")
-		} else {
 			log.Println(unzipPath+"apps.tb", "数据文件更新(cve说明)错误：", err)
+		} else {
+			log.Println("文件更新完毕:", targetPath+"apps.tb")
 		}
 		for _, file := range index {
 			// 复制 index数据文件到目标路径
@@ -66,9 +67,9 @@ var updescriptionCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(updescriptionCmd)
-	updescriptionCmd.Flags().StringP("unzipPath", "u", "/tmp/nvdbtools/cvedbsrc/", "cvedb解压后的目录")
-	updescriptionCmd.Flags().StringP("targetPath", "t", "/tmp/nvdbtools/cvedbtarget/", "cvedb解压后的目录")
+
+	updateCmd.Flags().StringP("unzipPath", "u", "/tmp/nvdbtools/cvedbsrc/", "cvedb解压后的目录")
+	updateCmd.Flags().StringP("targetPath", "t", "/tmp/nvdbtools/cvedbtarget/", "cvedb解压后的目录")
 
 }
 func CopyFile(dstFilePath string, srcFilePath string) (written int64, err error) {
@@ -99,6 +100,16 @@ func getDB() (*sql.DB, error) {
 			return nil, err
 		}
 	}
-
+	// 创建新表，保存cnnvd之外的条目的翻译信息
+	_, err = DB.Exec(translateTable)
 	return DB, nil
 }
+
+// 表结构用于保存cnnvd之外的条目的翻译信息
+var translateTable string = `
+CREATE TABLE IF NOT EXISTS [translate] (
+[cve_id] varchar(255),
+[descript] text
+);
+CREATE INDEX translate_cve_id_IDX ON "translate" (cve_id);
+`
