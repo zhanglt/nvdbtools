@@ -25,9 +25,10 @@ var updateCmd = &cobra.Command{
 		unzipPath, _ := cmd.Flags().GetString("unzipPath")
 		// 获取更新description之后的文件存放路径
 		targetPath, _ := cmd.Flags().GetString("targetPath")
+
+		proxy, _ := cmd.Flags().GetString("proxy")
 		// 初始化目录
-		os.RemoveAll(targetPath)
-		os.MkdirAll(targetPath, 0755)
+		common.ResetPath(targetPath)
 		full := []string{"alpine_full.tb", "amazon_full.tb", "centos_full.tb", "debian_full.tb", "mariner_full.tb", "oracle_full.tb", "suse_full.tb", "ubuntu_full.tb"}
 		index := []string{"alpine_index.tb", "amazon_index.tb", "centos_index.tb", "debian_index.tb", "mariner_index.tb", "oracle_index.tb", "suse_index.tb", "ubuntu_index.tb"}
 		// 打开cnvd数据
@@ -38,7 +39,7 @@ var updateCmd = &cobra.Command{
 
 		for _, file := range full {
 			// 更新full数据
-			err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", DB)
+			err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", proxy, DB)
 			if err != nil {
 				log.Fatalln(unzipPath+file, "数据文件更新(cve说明)错误：", err)
 			} else {
@@ -47,7 +48,7 @@ var updateCmd = &cobra.Command{
 
 		}
 		// 更新apps数据
-		err = common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", DB)
+		err = common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", proxy, DB)
 		if err != nil {
 			log.Fatalln(unzipPath+"apps.tb", "数据文件更新(cve说明)错误：", err)
 		} else {
@@ -70,6 +71,7 @@ func init() {
 
 	updateCmd.Flags().StringP("unzipPath", "u", "/tmp/nvdbtools/cvedbsrc/", "cvedb解压后的目录")
 	updateCmd.Flags().StringP("targetPath", "t", "/tmp/nvdbtools/cvedbtarget/", "cvedb解压后的目录")
+	updateCmd.Flags().StringP("proxy", "p", "http://127.0.0.1:10809", "cvedb解压后的目录")
 
 }
 func CopyFile(dstFilePath string, srcFilePath string) (written int64, err error) {

@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) error {
+func UpdateDescription(srcFile, targetFile, structType, proxy string, db *sql.DB) error {
 	var i int
 	fp, err := os.Open(srcFile)
 	if err != nil {
@@ -35,7 +35,7 @@ func UpdateDescription(srcFile, targetFile, structType string, db *sql.DB) error
 	scanner.Buffer(buf, cap(buf))
 	// 配置google翻译引擎的proxy
 	c := translator.Config{
-		Proxy: "http://127.0.0.1:10809",
+		Proxy: proxy,
 	}
 	//用proxy配置来初始化翻译引擎实例
 	t := translator.New(c)

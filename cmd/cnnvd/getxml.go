@@ -6,21 +6,22 @@ package cnnvd
 import (
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/zhanglt/nvdbtools/cnnvd"
+	"github.com/zhanglt/nvdbtools/common"
 )
 
+// xml文件预处理正则
 var rex string = "s/<vuln-descript>/<vuln-descript><![CDATA[/g;s%</vuln-descript>%]]></vuln-descript>%g;s/<name>/<name><![CDATA[/g;s%</name>%]]></name>%g"
 
 // getxmlCmd represents the getxml command
 var getxmlCmd = &cobra.Command{
 	Use:   "getxml",
-	Short: "cnnvd数据下载",
-	Long:  `从cnnvd官网下载xml数据文件`,
+	Short: "cnnvd数据下载,需要登陆cnnvd官网并后去登录token作为参数",
+	Long:  `cnnvd官网下载xml数据文件，需要登陆cnnvd官网并后去登录token作为参数`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取token参数
 		token, err := cmd.Flags().GetString("token")
@@ -41,10 +42,9 @@ var getxmlCmd = &cobra.Command{
 			return
 		}
 		// 初始化路径
-		os.RemoveAll(savePath)
-		os.MkdirAll(savePath, 0755)
+		common.ResetPath(savePath)
 
-		// 获取cve文件的ID列表
+		// 获取cnnvd cve文件的ID列表
 		list, err := cnnvd.GetIDlist()
 		if err != nil {
 			log.Println("获取cnnvd ID列表错误:", err)
@@ -73,7 +73,7 @@ var getxmlCmd = &cobra.Command{
 				}
 				fmt.Printf("[%s]完成下载：%s%s.xml\n", nt, list[idx], res)
 			case <-timeout:
-				fmt.Println("超时...:", list[idx]+".xml")
+				fmt.Println("下载超时...:", list[idx]+".xml")
 				break
 			}
 		}

@@ -11,7 +11,9 @@ import (
 var CnnvdCmd = &cobra.Command{
 	Use:   "cnnvd",
 	Short: "实现cnnvd数据相关操作",
-	Long:  `实现cnnvd相关数据操作，包括两个自命令，1、从cnnvd官网下载xml历史数据，2、将xml数据导入到sqlite数据库`,
+	Long: `实现cnnvd相关数据操作，包括两个自命令:
+	1、从cnnvd官网下载xml历史数据，
+	2、将xml数据导入到sqlite数据库`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
