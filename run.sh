@@ -1,1 +1,1 @@
-nohup ./nvdbtools  updescription > log.log 2>&1 &
+nohup ./nvdbtools  cve update  > log.log 2>&1 &
