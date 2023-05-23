@@ -1,4 +1,4 @@
-.PHONY: db copy_scan stage_init stage_scan scanner_image
+.PHONY: xml import unizp update  rebuild 
 token = ""
 all:
 # Keep this as the first
