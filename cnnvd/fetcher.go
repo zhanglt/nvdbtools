@@ -1,3 +1,6 @@
+/*
+Copyright © 2023 NAME HERE <kitsdk@163.com>
+*/
 package cnnvd
 
 import (
@@ -46,7 +49,7 @@ var index_id string = "CREATE INDEX cnnvd_other_id_cve_id_IDX ON cnnvd (other_id
 var index_desc string = "CREATE INDEX cnnvd_vuln_descript_IDX ON cnnvd (vuln_descript)"
 var urlList string = "https://www.cnnvd.org.cn/web/vulDataDownload/getPageList"
 
-// 修改供应商信息
+// 获取cnnvd cveID 列表
 func GetIDlist() ([]string, error) {
 
 	var (
@@ -174,6 +177,7 @@ type Cnnvd struct {
 	} `xml:"entry"`
 }
 
+// 解析XML文件提取cveid及description,并写入sqlite数据库
 func BuildCVE(fileXml string, db *sql.DB) (string, error) {
 	var i int
 	var id, description, vulnid string
