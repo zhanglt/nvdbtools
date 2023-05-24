@@ -20,8 +20,8 @@ code = ocr.classification(image)
 verifyToken =imageData["data"]["verifyToken"]
 # 登录信息
 postData ={
-    "username": "kitsdk@163.com",
-    "password": "bed128365216c019988915ed3add75fb",
+    "username": "",
+    "password": "",
     "code": code,
     "verifyToken": verifyToken
     }
