@@ -1,10 +1,10 @@
 .PHONY: xml import unizp update  rebuild 
-token = ""
+token = `./gettoken.py `
 all:
 # Keep this as the first
 all:
 	go build -ldflags='-s -w'
-
+# @echo  $(token)
 
 xml:
 	./nvdbtools cnnvd getxml --token $(token)
