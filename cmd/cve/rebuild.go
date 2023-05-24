@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -22,8 +21,7 @@ var rebuildCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// 获取重新打包后文件的存放路径
 		dbPath, _ := cmd.Flags().GetString("dbPath")
-		os.RemoveAll(dbPath)
-		os.MkdirAll(dbPath, 0755)
+		common.InitPath(dbPath)
 
 		// 获取打包源文件路径
 		srcPath, err := cmd.Flags().GetString("srcPath")
