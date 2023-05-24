@@ -28,7 +28,7 @@ var updateCmd = &cobra.Command{
 
 		proxy, _ := cmd.Flags().GetString("proxy")
 		// 初始化目录
-		common.ResetPath(targetPath)
+		common.InitPath(targetPath)
 		full := []string{"alpine_full.tb", "amazon_full.tb", "centos_full.tb", "debian_full.tb", "mariner_full.tb", "oracle_full.tb", "suse_full.tb", "ubuntu_full.tb"}
 		index := []string{"alpine_index.tb", "amazon_index.tb", "centos_index.tb", "debian_index.tb", "mariner_index.tb", "oracle_index.tb", "suse_index.tb", "ubuntu_index.tb"}
 		// 打开cnvd数据

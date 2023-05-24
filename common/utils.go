@@ -157,7 +157,7 @@ func s2b(s string) []byte {
 func b2s(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
-func ResetPath(path string) error {
+func InitPath(path string) error {
 	err := os.RemoveAll(path)
 	err = os.MkdirAll(path, 0755)
 	if err != nil {

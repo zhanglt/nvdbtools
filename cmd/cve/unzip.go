@@ -28,7 +28,7 @@ var unzipCmd = &cobra.Command{
 			log.Println("请输入正确unzipPath")
 			return
 		}
-		common.ResetPath(unzipPath)
+		common.InitPath(unzipPath)
 		// 解压cvedb数据库
 		if err := common.UNzipDb(cvedbPath, unzipPath); err == nil {
 			log.Println("cvedb数据库解压完成")

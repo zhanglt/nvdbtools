@@ -42,7 +42,7 @@ var getxmlCmd = &cobra.Command{
 			return
 		}
 		// 初始化路径
-		common.ResetPath(savePath)
+		common.InitPath(savePath)
 
 		// 获取cnnvd cve文件的ID列表
 		list, err := cnnvd.GetIDlist()
