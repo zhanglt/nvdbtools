@@ -137,7 +137,8 @@ func getDescribe(db *sql.DB, cveid string, srcDescribe string, t *translator.Tra
 func translate(text string, t *translator.Translator) string {
 	result, err := t.Translate(text, "en", "zh")
 	if err != nil {
-		log.Println("翻译错误：", err)
+		log.Println("翻译错误：", err,"------------:",text)
+		//log.Println("文本：",text)
 		return ""
 	}
 	//fmt.Println(result.Text)
