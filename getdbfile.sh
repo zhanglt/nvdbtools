@@ -12,8 +12,9 @@ fi
 # 检查scanner容器镜像是否存在
 scanner=`docker images neuvector/scanner:latest |wc -l`
 if [ $scanner -lt 2 ]; then 
-  echo "没有发现 neuvector/scanner:latest镜像,请先pull镜像文件"
+  echo "没有发现 neuvector/scanner:latest镜像,pull镜像文件"
   echo "执行命令docker pull neuvector/scanner 可pull镜像"
+  docker pull neuvector/scanner
   exit 
 fi
 
