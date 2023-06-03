@@ -1,5 +1,5 @@
 .PHONY: xml import unizp update  rebuild 
-token = `./gettoken.py `
+token = $(shell ./gettoken.py )
 all:
 # Keep this as the first
 all:
@@ -12,6 +12,8 @@ xml:
 import:
 	./nvdbtools cnnvd importDB
 
+getcve:
+	./getdbfile.sh
 
 unzip:
 	./nvdbtools cve unzip
@@ -21,4 +23,13 @@ update:
 
 rebuild:
 	./nvdbtools cve rebuild
+p1: xml import getcve
+
+p2: unzip update 
+
+prepare: p1 p2 
+
+build: prepare rebuild
+
+
 
