@@ -49,20 +49,9 @@ func ReadLines(inFile, outFile string, ts *translator.Translator) error {
 			break //文件读完了,退出for
 		}
 		s := read.Text() //获取每一行
-		l := len(s)
-		if l > 17 {
-			if strings.Contains(s[0:14], "Description:") {
-				tmp := (t(s[16:l-2], ts))
-				s = s[0:16] + tmp + s[l-2:l]
-			}
-
-			if strings.Contains(s[0:14], "Remediation:") {
-				tmp := (t(s[16:l-2], ts))
-				s = s[0:16] + tmp + s[l-2:l]
-
-			}
-		} else {
-			s = s + "\n"
+		tmp := getStr(s, "Description:", "Remediation:", ts)
+		if tmp != "" {
+			s = tmp
 		}
 		write.WriteString(fmt.Sprintf("%s\n", s))
 	}
@@ -70,4 +59,31 @@ func ReadLines(inFile, outFile string, ts *translator.Translator) error {
 	err = write.Flush()
 	return err
 
+}
+func getStr(str, substr1, substr2 string, ts *translator.Translator) string {
+
+	if strings.Contains(str, substr1) {
+		return substring(str, substr1, ts)
+	}
+	if strings.Contains(str, substr2) {
+		return substring(str, substr2, ts)
+	}
+
+	return ""
+}
+
+func substring(str, substr string, ts *translator.Translator) string {
+	var s string
+	l := len(str)
+	//获取字符串的位置
+	i := strings.Index(str, substr)
+	// 截取需要翻译的部分
+	s = str[i+len(substr)+2 : l-1]
+	//判断翻译部分是否为空或者None.
+	if s != "" && s != "None." {
+		s = t(s, ts)
+	}
+	//拼接字符串
+	s = str[0:i+len(substr)+2] + s + str[l-1:l]
+	return s
 }
