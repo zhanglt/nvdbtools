@@ -9,7 +9,7 @@ def gettoken():
 # cnnvd官网获取登录验证码图片地址
     urlImage = "https://www.cnnvd.org.cn/web/verificationCode/getBase64Image"
 # 获取验证码图片（base64）
-    response = requests.get(url=urlImage)
+    response = requests.get(url=urlImage,verify=False)
 # json序列化
     imageData = json.loads(response.text)
 # 提取图片数据
@@ -30,7 +30,7 @@ def gettoken():
         "verifyToken": verifyToken
         }
 # 模拟登录
-    rq=requests.post(url=urlLogin,data=json.dumps(postData),headers={'Content-Type':'application/json'})
+    rq=requests.post(url=urlLogin,data=json.dumps(postData),headers={'Content-Type':'application/json'},verify=False)
 # 序列化返回信息
     loginData = json.loads(rq.text)
 #提取token

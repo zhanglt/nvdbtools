@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <kitsdk@163.com>
 package cnnvd
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"encoding/json"
 	"encoding/xml"
@@ -71,7 +72,7 @@ func GetIDlist() ([]string, error) {
 		return nil, err
 	}
 	r.Header.Add("Content-Type", "application/json")
-
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	// DO: HTTP请求
 	rs, err := http.DefaultClient.Do(r)
 	if err != nil {

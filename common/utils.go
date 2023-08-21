@@ -122,14 +122,14 @@ func getDescribe(db *sql.DB, cveid string, srcDescribe string, t *translator.Tra
 			log.Println("---:", tindex, "---", cveid)
 			tx.Commit()
 			//返回翻译后的description
-			return ts
+			return "ts:" + ts
 		}
 		// 如果在translate表中查到对应数据，返回description
-		return vuln_descript.String
+		return "ts:" + vuln_descript.String
 	}
 	//log.Println("查到中文说明：", cveid)
 
-	return vuln_descript.String
+	return "cn:" + vuln_descript.String
 
 }
 
@@ -137,7 +137,7 @@ func getDescribe(db *sql.DB, cveid string, srcDescribe string, t *translator.Tra
 func translate(text string, t *translator.Translator) string {
 	result, err := t.Translate(text, "en", "zh")
 	if err != nil {
-		log.Println("翻译错误：", err,"------------:",text)
+		log.Println("翻译错误：", err, "------------:", text)
 		//log.Println("文本：",text)
 		return ""
 	}
