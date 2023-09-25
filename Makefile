@@ -1,6 +1,7 @@
 .PHONY: xml import unizp update  rebuild 
 token = $(shell ./gettoken.py )
 all:
+
 # Keep this as the first
 all:
 	go build -ldflags='-s -w'
