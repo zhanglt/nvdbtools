@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
@@ -37,16 +38,24 @@ var updateCmd = &cobra.Command{
 			log.Println("获取sqlit db数据库错误:", err)
 		}
 
+		var wg sync.WaitGroup
+
 		for _, file := range full {
 			// 更新full数据
-			err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", proxy, DB)
-			if err != nil {
-				log.Fatalln(unzipPath+file, "数据文件更新(cve说明)错误：", err)
-			} else {
-				log.Println("文件更新完毕:", targetPath+file)
-			}
+			wg.Add(1)
+			go func(file string) {
+				defer wg.Done()
+				err := common.UpdateDescription(unzipPath+file, targetPath+file, "full", proxy, DB)
+				if err != nil {
+					log.Fatalln(unzipPath+file, "数据文件更新(cve说明)错误：", err)
+				} else {
+					log.Println("文件更新完毕:", targetPath+file)
+				}
+			}(file)
 
 		}
+		wg.Wait()
+
 		// 更新apps数据
 		err = common.UpdateDescription(unzipPath+"apps.tb", targetPath+"apps.tb", "apps", proxy, DB)
 		if err != nil {
