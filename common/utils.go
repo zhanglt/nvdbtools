@@ -34,8 +34,16 @@ func UpdateDescription(srcFile, targetFile, structType, proxy string, db *sql.DB
 	buf := make([]byte, 0, bufio.MaxScanTokenSize*10) //根据自己的需要调整这个倍数
 	scanner.Buffer(buf, cap(buf))
 	// 配置google翻译引擎的proxy
-	c := translator.Config{
-		Proxy: proxy,
+
+	var c translator.Config
+	if proxy == "" {
+		c = translator.Config{
+			//Proxy: proxy,
+		}
+	} else {
+		c = translator.Config{
+			Proxy: proxy,
+		}
 	}
 	//用proxy配置来初始化翻译引擎实例
 	t := translator.New(c)
