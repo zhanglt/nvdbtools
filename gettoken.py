@@ -1,4 +1,4 @@
-#!/usr/bin/python3.10
+#!/root/venvs/py312/bin/python
 # -*- coding: utf-8 -*-
 import json
 import ddddocr
@@ -21,7 +21,8 @@ def gettoken():
     #print(code)
 # 提取辅助验证信息
     verifyToken =imageData["data"]["verifyToken"]
-    #print(verifyToken)
+    print("-----------------")
+    print(verifyToken)
 # 登录信息
     postData ={
         "username": "kitsdk@163.com",
@@ -32,6 +33,8 @@ def gettoken():
 # 模拟登录
     rq=requests.post(url=urlLogin,data=json.dumps(postData),headers={'Content-Type':'application/json'},verify=False)
 # 序列化返回信息
+    print("=-=====")
+    print(rq.text)
     loginData = json.loads(rq.text)
 #提取token
     print(loginData["data"]["token"])
